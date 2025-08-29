@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>🛡️ AngryDroid AI Shield</title>
+  <style>
+    body {
+      background-color: #0d0d0d;
+      color: #eee;
+      font-family: 'Segoe UI', sans-serif;
+      text-align: center;
+      padding: 2em;
+    }
+    #wizard {
+      width: 180px;
+      border-radius: 12px;
+      box-shadow: 0 0 12px #00ffe7;
+      margin-bottom: 1em;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    #wizard.glow {
+      transform: scale(1.1);
+      box-shadow: 0 0 40px #00ffe7;
+    }
+    input[type="file"], button {
+      margin-top: 1em;
+      padding: 0.6em 1.2em;
+      font-size: 1em;
+      border-radius: 8px;
+      border: none;
+    }
+    button {
+      background-color: #00ffe7;
+      color: #000;
+      cursor: pointer;
+    }
+    #verdict, #scanStatus {
+      font-size: 1.2em;
+      margin-top: 1em;
+    }
+    #badge {
+      margin-top: 1em;
+      font-size: 1.2em;
+      color: #00ff88;
+      display: none;
+    }
+    #loreCapsule {
+      background-color: #111;
+      border: 2px solid #00ffe7;
+      border-radius: 12px;
+      padding: 1em;
+      margin-top: 2em;
+      display: none;
+      box-shadow: 0 0 20px #00ffe7;
+    }
+    #attribution {
+      margin-top: 3em;
+      font-size: 0.8em;
+      color: #00ffe7;
+    }
+    #attribution a {
+      color: #ffcc00;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🧙‍♂️ AngryDroid AI Shield</h1>
+  <img id="wizard" src="https://www.megadisk.net/cloud11/index.php/apps/files_sharing/ajax/publicpreview.php?x=1280&y=370&a=true&file=security.png&t=PSmaBsuIdeIzL78&scalingup=0" alt="Wizard Idle" />
+
+  <h3>📁 Upload a File to Scan</h3>
+  <input type="file" id="fileInput" />
+  <button onclick="scanFile()">Scan File</button>
+
+  <div id="verdict"></div>
+  <div id="scanStatus"></div>
+  <div id="badge">🎖️ Scan Complete — Badge Unlocked!</div>
+
+  <div id="loreCapsule">
+    <h3>📜 Lore Capsule</h3>
+    <p id="loreText">Awaiting scan summary...</p>
+  </div>
+
+  <div id="attribution">
+    <hr style="border-color:#00ffe7;">
+    <p>© 2025 Angry Droid AI Project</p>
+    <p>Created by Chris Berry, CEO and founder</p>
+    <p>Licensed for personal, educational, and non-commercial use only</p>
+    <p>Registered creative module of the Angry Droid ecosystem</p>
+    <p>Contact: <a href="mailto:angrydroid@offilive.com">angrydroid@offilive.com</a></p>
+  </div>
+
+  <script>
+    async function scanFile() {
+      const fileInput = document.getElementById("fileInput");
+      const file = fileInput.files[0];
+      const wizard = document.getElementById("wizard");
+      const verdict = document.getElementById("verdict");
+      const scanStatus = document.getElementById("scanStatus");
+      const badge = document.getElementById("badge");
+      const loreCapsule = document.getElementById("loreCapsule");
+      const loreText = document.getElementById("loreText");
+
+      if (!file) {
+        scanStatus.textContent = "❌ No file selected.";
+        return;
+      }
+
+      verdict.textContent = "";
+      scanStatus.textContent = "🔍 Scanning file...";
+      badge.style.display = "none";
+      loreCapsule.style.display = "none";
+      wizard.classList.add("glow");
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      try {
+        const response = await fetch("http://localhost:5000/scan", {
+          method: "POST",
+          body: formData
+        });
+
+        if (!response.ok) {
+          throw new Error(`Server responded with ${response.status}`);
+        }
+
+        const result = await response.json();
+        console.log("Scan result:", result);
+
+        wizard.classList.remove("glow");
+        verdict.textContent = `${result.verdict}: ${result.filename}`;
+        scanStatus.textContent = `SHA256: ${result.sha256}`;
+        badge.style.display = "block";
+        loreCapsule.style.display = "block";
+        loreText.textContent = result.lore;
+
+      } catch (error) {
+        console.error("Scan error:", error);
+        wizard.classList.remove("glow");
+        scanStatus.textContent = "❌ Scan failed. Check console for details.";
+      }
+    }
+  </script>
+
+</body>
+</html>
